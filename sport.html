@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arifin Sport Center - Toko Alat Olahraga</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo"> Arifin Sport Center</div>
+                <div class="cart-icon" onclick="openCart()">
+                    🛒 Keranjang <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="search-filter">
+        <div class="container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari produk...">
+                <select id="categoryFilter">
+                    <option value="">Semua Kategori</option>
+                    <option value="Sepak Bola">Sepak Bola</option>
+                    <option value="Basket">Basket</option>
+                    <option value="Badminton">Badminton</option>
+                    <option value="Fitness">Fitness</option>
+                    <option value="Lari">Lari</option>
+                </select>
+                <select id="priceFilter">
+                    <option value="">Semua Harga</option>
+                    <option value="0-500000">< Rp 500.000</option>
+                    <option value="500000-1000000">Rp 500.000 - Rp 1.000.000</option>
+                    <option value="1000000-9999999">> Rp 1.000.000</option>
+                </select>
+                <button onclick="filterProducts()">Cari</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="products-grid" id="productsGrid"></div>
+    </main>
+
+    <!-- Modal Detail Produk -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('productModal')">&times;</span>
+            <div class="product-detail" id="productDetail"></div>
+        </div>
+    </div>
+
+    <!-- Modal Keranjang -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('cartModal')">&times;</span>
+            <div id="cartContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('checkoutModal')">&times;</span>
+            <div id="checkoutContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { 
+                id: 1, 
+                name: 'Bola Sepak Profesional', 
+                category: 'Sepak Bola', 
+                price: 450000, 
+                image: 'bola.jpg',
+                description: 'Bola sepak kualitas profesional dengan material kulit sintetis premium. Cocok untuk pertandingan resmi dan latihan intensif.' 
+            },
+            { 
+                id: 2, 
+                name: 'Sepatu Futsal Nike', 
+                category: 'Sepak Bola', 
+                price: 850000, 
+                image: 'sepatufutsal.jpg',
+                description: 'Sepatu futsal dengan teknologi grip maksimal dan kenyamanan tinggi. Desain sporty dan tahan lama.' 
+            },
+            { 
+                id: 3, 
+                name: 'Bola Basket Molten', 
+                category: 'Basket', 
+                price: 550000, 
+                image: 'basket.jpg',
+                description: 'Bola basket official size dengan grip superior. Material rubber berkualitas tinggi untuk performa optimal.' 
+            },
+            { 
+                id: 4, 
+                name: 'Jersey Basket Premium', 
+                category: 'Basket', 
+                price: 320000, 
+                image: 'jersey basket.jpg',
+                description: 'Jersey basket breathable dengan teknologi dry-fit. Nyaman digunakan untuk latihan maupun pertandingan.' 
+            },
+            { 
+                id: 5, 
+                name: 'Raket Badminton Yonex', 
+                category: 'Badminton', 
+                price: 1250000, 
+                image: 'raket.jpg',
+                description: 'Raket badminton carbon fiber dengan bobot ringan. Control dan power seimbang untuk pemain intermediate hingga advanced.' 
+            },
+            { 
+                id: 6, 
+                name: 'Shuttlecock Premium (Tube)', 
+                category: 'Badminton', 
+                price: 180000, 
+                image: 'shuttelpremium.jpg',
+                description: 'Shuttlecock bulu angsa berkualitas tinggi. Isi 12 pcs per tube. Durabilitas excellent untuk latihan intensif.' 
+            },
+            { 
+                id: 7, 
+                name: 'Dumbbell Set 20kg', 
+                category: 'Fitness', 
+                price: 650000, 
+                image: 'dumble.jpg',
+                description: 'Set dumbbell adjustable 2.5kg - 20kg. Coating karet anti slip dan pelindung lantai. Ideal untuk home gym.' 
+            },
+            { 
+                id: 8, 
+                name: 'Matras Yoga Premium', 
+                category: 'Fitness', 
+                price: 280000, 
+                image: 'matras.jpg',
+                description: 'Matras yoga tebal 8mm dengan permukaan anti slip. Material ramah lingkungan dan mudah dibersihkan. Termasuk tas pembawa.' 
+            },
+            { 
+                id: 9, 
+                name: 'Sepatu Lari Adidas', 
+                category: 'Lari', 
+                price: 950000, 
+                image: 'sepatulari.jpg',
+                description: 'Sepatu lari dengan teknologi cushioning boost. Ringan dan responsif untuk jarak jauh maupun sprint. Breathable mesh upper.' 
+            },
+            { 
+                id: 10, 
+                name: 'Resistance Band Set', 
+                category: 'Fitness', 
+                price: 150000, 
+                image: 'resistance.jpg',
+                description: 'Set resistance band 5 level kekuatan. Material latex berkualitas. Portable untuk workout di mana saja.' 
+            },
+            { 
+                id: 11, 
+                name: 'Tas Gym Multifungsi', 
+                category: 'Fitness', 
+                price: 380000, 
+                image: 'tasgym.jpg',
+                description: 'Tas gym spacious dengan kompartemen sepatu terpisah. Material water resistant dan tahan lama. Banyak kantong untuk organisasi maksimal.' 
+            },
+            { 
+                id: 12, 
+                name: 'Kacamata Renang Speedo', 
+                category: 'Lari', 
+                price: 220000, 
+                image: 'kacamatrenang.jpg',
+                description: 'Kacamata renang anti fog dengan UV protection. Seal yang nyaman dan tidak bocor. Adjustable strap untuk berbagai ukuran kepala.' 
+            }
+        ];
+
+        let cart = [];
+        let filteredProducts = [...products];
+
+        function displayProducts(productsToShow) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = productsToShow.map(product => `
+                <div class="product-card" onclick="showProductDetail(${product.id})">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">${product.category}</div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
+                        <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart(${product.id})">
+                            Tambah ke Keranjang
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const priceRange = document.getElementById('priceFilter').value;
+
+            filteredProducts = products.filter(product => {
+                const matchSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                  product.category.toLowerCase().includes(searchTerm);
+                const matchCategory = !category || product.category === category;
+                
+                let matchPrice = true;
+                if (priceRange) {
+                    const [min, max] = priceRange.split('-').map(Number);
+                    matchPrice = product.price >= min && product.price <= max;
+                }
+
+                return matchSearch && matchCategory && matchPrice;
+            });
+
+            displayProducts(filteredProducts);
+        }
+
+        function showProductDetail(id) {
+            const product = products.find(p => p.id === id);
+            const detail = document.getElementById('productDetail');
+            detail.innerHTML = `
+                <div class="detail-image">
+                    <img src="${product.image}" alt="${product.name}">
+                </div>
+                <div class="detail-info">
+                    <div class="product-category">${product.category}</div>
+                    <h2>${product.name}</h2>
+                    <p>${product.description}</p>
+                    <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
+                    <button class="btn btn-primary" onclick="addToCart(${product.id}); closeModal('productModal')">
+                        Tambah ke Keranjang
+                    </button>
+                </div>
+            `;
+            document.getElementById('productModal').style.display = 'block';
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const existingItem = cart.find(item => item.id === id);
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartCount();
+            alert('Produk berhasil ditambahkan ke keranjang!');
+        }
+
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        function openCart() {
+            const content = document.getElementById('cartContent');
+            
+            if (cart.length === 0) {
+                content.innerHTML = '<div class="cart-items"><p style="text-align:center; padding:2rem;">Keranjang kosong</p></div>';
+            } else {
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                content.innerHTML = `
+                    <div class="cart-items">
+                        <h2 style="margin-bottom:1.5rem;">Keranjang Belanja</h2>
+                        ${cart.map(item => `
+                            <div class="cart-item">
+                                <img src="${item.image}" alt="${item.name}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                                <div class="cart-item-info">
+                                    <strong>${item.name}</strong>
+                                    <div>Rp ${item.price.toLocaleString('id-ID')}</div>
+                                </div>
+                                <div class="cart-item-actions">
+                                    <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                    <span style="margin:0 10px; font-weight:bold;">${item.quantity}</span>
+                                    <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                    <button class="remove-btn" onclick="removeFromCart(${item.id})">Hapus</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="cart-total">
+                        <h3>Total: Rp ${total.toLocaleString('id-ID')}</h3>
+                        <button class="btn btn-success" onclick="proceedToCheckout()">Lanjut ke Pembayaran</button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('cartModal').style.display = 'block';
+        }
+
+        function updateQuantity(id, change) {
+            const item = cart.find(i => i.id === id);
+            item.quantity += change;
+            
+            if (item.quantity <= 0) {
+                removeFromCart(id);
+            } else {
+                openCart();
+                updateCartCount();
+            }
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            openCart();
+            updateCartCount();
+        }
+
+        function proceedToCheckout() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const content = document.getElementById('checkoutContent');
+            
+            content.innerHTML = `
+                <div class="checkout-form">
+                    <h2 style="margin-bottom:1.5rem;">Checkout</h2>
+                    <form onsubmit="processOrder(event)">
+                        <div class="form-group">
+                            <label>Nama Lengkap *</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nomor Telepon *</label>
+                            <input type="tel" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Alamat Lengkap *</label>
+                            <textarea rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Metode Pembayaran *</label>
+                            <div class="payment-methods">
+                                <div class="payment-option" onclick="selectPayment(this, 'transfer')">
+                                    <div style="font-size:2rem;">🏦</div>
+                                    <div>Transfer Bank</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPayment(this, 'cod')">
+                                    <div style="font-size:2rem;">💵</div>
+                                    <div>Cash on Delivery</div>
+                                </div>
+                                <div class="payment-option" onclick="selectPayment(this, 'ewallet')">
+                                    <div style="font-size:2rem;">📱</div>
+                                    <div>E-Wallet</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedPayment" required>
+                        </div>
+                        <div class="order-summary">
+                            <h3 style="margin-bottom:1rem;">Ringkasan Pesanan</h3>
+                            ${cart.map(item => `
+                                <div class="order-summary-item">
+                                    <span>${item.name} x${item.quantity}</span>
+                                    <span>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                </div>
+                            `).join('')}
+                            <hr style="margin:1rem 0;">
+                            <div class="order-summary-item" style="font-weight:bold; font-size:1.2rem;">
+                                <span>Total</span>
+                                <span style="color:#27ae60;">Rp ${total.toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success" style="margin-top:1.5rem;">Konfirmasi Pesanan</button>
+                    </form>
+                </div>
+            `;
+            
+            closeModal('cartModal');
+            document.getElementById('checkoutModal').style.display = 'block';
+        }
+
+        function selectPayment(element, method) {
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('selectedPayment').value = method;
+        }
+
+        function processOrder(event) {
+            event.preventDefault();
+            const orderId = 'ORD' + Date.now();
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const content = document.getElementById('checkoutContent');
+            content.innerHTML = `
+                <div class="confirmation">
+                    <div class="success-icon">✅</div>
+                    <h2>Pesanan Berhasil!</h2>
+                    <p>Terima kasih atas pesanan Anda</p>
+                    <div class="order-details">
+                        <h3 style="margin-bottom:1rem;">Detail Pesanan</h3>
+                        <p><strong>Nomor Pesanan:</strong> ${orderId}</p>
+                        <p><strong>Total Pembayaran:</strong> Rp ${total.toLocaleString('id-ID')}</p>
+                        <p style="margin-top:1rem; color:#666;">Kami akan mengirimkan konfirmasi ke email Anda.</p>
+                        ${cart.map(item => `
+                            <div style="margin-top:0.5rem;">
+                                ${item.name} x${item.quantity} - Rp ${(item.price * item.quantity).toLocaleString('id-ID')}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-primary" onclick="closeModal('checkoutModal'); resetCart()">Kembali ke Beranda</button>
+                </div>
+            `;
+        }
+
+        function resetCart() {
+            cart = [];
+            updateCartCount();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        displayProducts(products);
+    </script>
+</body>
+</html>
